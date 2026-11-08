@@ -1,35 +1,30 @@
 # Site da Zunkuft Digital Intelligence
 
 Site estático (HTML, CSS e JS puros). Não precisa de build.
+No ar em: https://galdinoheitor15-star.github.io/zunkuft-site/
 
 ## Páginas
-- `index.html`: página principal. A manchete repete o anúncio do Instagram e a aplicação de 8 perguntas abre por cima da página.
-- `pacotes.html`: pacotes com preço fechado (trilha Pronta, até R$ 3 mil).
+- `index.html`: página principal. Os botões "Pedir orçamento" abrem as 8 perguntas por cima da página.
+- `pacotes.html`: pacotes com preço fechado (até R$ 3 mil).
 
-## Antes de publicar
+## Como o lead chega ao WhatsApp
+1. O visitante responde 8 perguntas: nome e WhatsApp, cargo, empresa e setor, tamanho da equipe, do que precisa, o que mais toma tempo, quando quer começar e investimento.
+2. No fim, o site abre o WhatsApp da Zunkuft com o resumo das respostas já escrito. Ele só toca em enviar.
+3. O agente de IA (`Documents\zunkuft-agente`) lê o resumo, não repete perguntas, tira dúvidas e leva ao pedido de orçamento.
+
+A mensagem sempre contém a palavra "Zunkuft", que é o que faz o agente responder a conversa.
+
+## Configuração
 Edite só `assets/config.js`:
-- `whatsapp`: número comercial (DDI + DDD + número, só dígitos).
+- `whatsapp`: número que recebe os leads (DDI + DDD + número, só dígitos).
 - `instagram`: link do perfil.
-- `calHighTicket` e `calExpressa`: links do Cal.com ou Calendly (45 min e 20 min).
-- `webhook`: URL que recebe os leads (Make, Zapier, Kommo ou Google Apps Script).
-- `closer`: nome de quem faz as calls.
+- `webhook`: opcional. URL que recebe uma cópia dos leads em JSON (Make, Zapier, Google Apps Script).
 - `vagasFundadores`: vagas restantes do Programa Clientes Fundadores.
-- `pagamentos`: links de pagamento dos pacotes.
+- `pagamentos`: links de pagamento dos pacotes. Vazio = o botão abre o WhatsApp com o nome do pacote.
 
 Os preços dos pacotes (`pacotes.html`) são exemplos. Troque pelos valores reais.
 
-## Como a aplicação direciona o lead
-| Resposta | Trilha | O que aparece no fim |
-|---|---|---|
-| "Só estou pesquisando" | Pesquisa | Link para as demos no Instagram |
-| Até R$ 3 mil | Pronta | Link para os pacotes |
-| R$ 3 a 10 mil | Expressa | Agenda de 20 min |
-| R$ 10 mil ou mais | High ticket | Agenda de 45 min |
+Os parâmetros `utm_*` do link do anúncio são guardados e enviados ao webhook, para saber qual criativo trouxe cada lead.
 
-Depois da 1ª pergunta (nome e WhatsApp), o site já envia um lead `parcial` para o webhook. Assim, quem abandona no meio ainda pode ser chamado. No fim, envia o lead `completa` com a trilha.
-
-Os parâmetros `utm_*` do link do anúncio são guardados e enviados junto, para saber qual criativo trouxe cada lead.
-
-## Publicar no GitHub Pages
-1. Crie um repositório e envie esta pasta.
-2. Em Settings → Pages, escolha a branch `main` e a pasta raiz.
+## Publicar
+O GitHub Pages publica a branch `main` sozinho. Depois de mudar algo, faça commit e push; o site atualiza em 1 ou 2 minutos.
