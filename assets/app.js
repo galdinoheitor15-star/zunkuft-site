@@ -277,7 +277,7 @@
       `*Preciso de:* ${a.necessidade || "-"}`,
       `*O que mais toma tempo hoje:* ${a.dor || "-"}`,
       `*Quando quero começar:* ${a.quando || "-"}`,
-      `*Investimento previsto:* ${a.investimento || "-"}`,
+      `*Orçamento escolhido:* ${a.investimento || "-"}`,
     ];
     if (a.custo_estimado) linhas.push(`*Custo estimado do trabalho manual:* ${brl(a.custo_estimado)} por mês`);
     const wa = waLink(linhas.join("\n"));
