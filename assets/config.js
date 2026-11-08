@@ -2,7 +2,7 @@
 window.ZK_CONFIG = {
   // WhatsApp comercial: DDI + DDD + número, só dígitos. Ex.: "5511987654321".
   // Vazio = os botões de WhatsApp ficam escondidos.
-  whatsapp: "",
+  whatsapp: "5581994655539",
 
   // Perfil do Instagram.
   instagram: "https://www.instagram.com/",

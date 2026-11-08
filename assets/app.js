@@ -113,14 +113,14 @@
     update();
   }
 
-  /* Aplicação em etapas */
+  /* Aplicação em etapas: no fim, leva para o WhatsApp com o resumo das respostas */
   const dlg = $("#aplicacao");
   if (!dlg) return;
   const form = $("form", dlg), body = $(".apl-body", dlg), bar = $(".bar i", dlg), count = $(".count", dlg);
   const back = $("[data-back]", dlg), next = $("[data-next]", dlg), foot = $(".apl-foot", dlg);
 
   const STEPS = [
-    { title: "Para começar, como falamos com você?", hint: "Leva 2 minutos. Respondemos em até 1 minuto no WhatsApp.",
+    { title: "Para começar, como falamos com você?", hint: "Leva 2 minutos. No fim, o WhatsApp abre com o resumo das suas respostas.",
       fields: [
         { name: "nome", label: "Seu nome", type: "text", autocomplete: "name" },
         { name: "whatsapp", label: "WhatsApp com DDD", type: "tel", autocomplete: "tel", inputmode: "tel" },
@@ -175,7 +175,7 @@
     foot.hidden = false;
     back.hidden = i === 0;
     next.hidden = !!s.options;
-    next.firstChild.textContent = i === STEPS.length - 1 ? "Enviar " : "Continuar ";
+    next.firstChild.textContent = i === STEPS.length - 1 ? "Ir para o WhatsApp " : "Continuar ";
 
     const wrap = document.createElement("div");
     wrap.className = "step-in";
@@ -265,52 +265,38 @@
     foot.hidden = true;
 
     const nome = (a.nome || "").split(" ")[0];
-    const msg = `Olá! Acabei de fazer a aplicação no site da Zunkuft. Sou ${a.nome || ""}, da ${a.empresa || "minha empresa"}.`;
-    const wa = waLink(msg);
-    const decide = a.cargo === "Dono ou sócio" || a.cargo === "Diretor";
-    const closer = C.closer || "nosso especialista";
 
-    const R = {
-      high: {
-        t: `${nome}, você está no perfil do Diagnóstico de Inteligência.`,
-        p: `Escolha um horário com ${closer}. São 45 minutos para entender sua operação e calcular quanto o problema custa hoje.${decide ? "" : " Se puder, traga para a conversa quem decide a compra."}`,
-        btn: C.calHighTicket ? { href: C.calHighTicket, label: "Escolher meu horário" } : null,
-      },
-      expressa: {
-        t: `${nome}, seu projeto cabe na nossa trilha Expressa.`,
-        p: `Uma conversa de 20 minutos com ${closer} e você recebe a proposta no mesmo dia.`,
-        btn: C.calExpressa ? { href: C.calExpressa, label: "Escolher meu horário" } : null,
-      },
-      pronta: {
-        t: `${nome}, temos pacotes com preço fechado para você.`,
-        p: "Landing pages e sites prontos para vender, com preço e prazo definidos. Sem reunião, se você preferir.",
-        btn: { href: "pacotes.html", label: "Ver os pacotes", same: true },
-      },
-      pesquisa: {
-        t: `Sem pressa, ${nome}.`,
-        p: "Enquanto pesquisa, veja nossos agentes de IA funcionando no Instagram. Quando quiser conversar, é só chamar.",
-        btn: C.instagram ? { href: C.instagram, label: "Ver demos no Instagram" } : null,
-      },
-    }[a.trilha];
+    // Resumo das 8 respostas, que vai pronto para o WhatsApp da Zunkuft
+    const linhas = [
+      "Olá! Acabei de responder as perguntas no site da Zunkuft.",
+      "",
+      `*Nome:* ${a.nome || "-"}`,
+      `*Cargo:* ${a.cargo || "-"}`,
+      `*Empresa:* ${a.empresa || "-"}${a.setor ? ` (${a.setor})` : ""}`,
+      `*Equipe:* ${a.colaboradores || "-"} pessoas`,
+      `*Preciso de:* ${a.necessidade || "-"}`,
+      `*O que mais toma tempo hoje:* ${a.dor || "-"}`,
+      `*Quando quero começar:* ${a.quando || "-"}`,
+      `*Investimento previsto:* ${a.investimento || "-"}`,
+    ];
+    if (a.custo_estimado) linhas.push(`*Custo estimado do trabalho manual:* ${brl(a.custo_estimado)} por mês`);
+    const wa = waLink(linhas.join("\n"));
 
     const box = document.createElement("div");
     box.className = "result step-in";
     box.innerHTML = `<div class="ok" aria-hidden="true">✓</div>`;
-    const h = document.createElement("h2"); h.id = "apl-title"; h.textContent = R.t;
-    const p = document.createElement("p"); p.className = "muted"; p.textContent = R.p;
+    const h = document.createElement("h2"); h.id = "apl-title";
+    h.textContent = `Pronto, ${nome}! Agora é só enviar.`;
+    const p = document.createElement("p"); p.className = "muted";
+    p.textContent = wa
+      ? "Vamos abrir o WhatsApp da Zunkuft com o resumo das suas respostas já escrito. Toque em enviar e você é atendido na hora."
+      : `Recebemos suas respostas. Vamos te chamar no WhatsApp ${a.whatsapp || ""} em instantes.`;
     box.append(h, p);
-    const link = (href, label, cls, same) => {
+    if (wa) {
       const el = document.createElement("a");
-      el.className = `btn ${cls}`; el.href = href; el.textContent = label;
-      if (!same) { el.target = "_blank"; el.rel = "noopener"; }
-      return el;
-    };
-    if (R.btn) box.append(link(R.btn.href, R.btn.label, "btn-primary", R.btn.same));
-    if (wa) box.append(link(wa, R.btn ? "Prefiro falar pelo WhatsApp" : "Falar agora pelo WhatsApp", R.btn ? "btn-ghost" : "btn-primary"));
-    if (!R.btn && !wa) {
-      const f = document.createElement("p");
-      f.textContent = `Recebemos sua aplicação. Vamos te chamar no WhatsApp ${a.whatsapp || ""} em instantes.`;
-      box.append(f);
+      el.className = "btn btn-primary"; el.href = wa; el.textContent = "Abrir o WhatsApp";
+      box.append(el);
+      setTimeout(() => { location.href = wa; }, reduce ? 300 : 1200);
     }
     body.replaceChildren(box);
     store.del("zk_aplicacao");
