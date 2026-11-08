@@ -10,7 +10,7 @@ No ar em: https://galdinoheitor15-star.github.io/zunkuft-site/
 ## Como o lead chega ao WhatsApp
 1. O visitante responde 8 perguntas: nome e WhatsApp, cargo, empresa e setor, tamanho da equipe, do que precisa, o que mais toma tempo, quando quer começar e investimento.
 2. No fim, o site abre o WhatsApp da Zunkuft com o resumo das respostas já escrito. Ele só toca em enviar.
-3. O agente de IA (`Documents\zunkuft-agente`) lê o resumo, não repete perguntas, tira dúvidas e leva ao pedido de orçamento.
+3. O agente (`Documents\zunkuft-agente`) reconhece o resumo, te manda um aviso com as 8 respostas e o orçamento escolhido, confirma o recebimento para o lead e deixa a conversa com você. Ele não repete nenhuma pergunta.
 
 A mensagem sempre contém a palavra "Zunkuft", que é o que faz o agente responder a conversa.
 
