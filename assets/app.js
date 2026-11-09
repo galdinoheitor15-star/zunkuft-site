@@ -11,6 +11,7 @@
     del(k) { try { localStorage.removeItem(k); } catch {} },
   };
   const brl = (n) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
+  const lista = (v) => (Array.isArray(v) ? v : v ? [v] : []);
 
   /* Origem do lead (UTM do anúncio) */
   const params = new URLSearchParams(location.search);
@@ -27,14 +28,39 @@
     if (href) { a.href = href; a.target = "_blank"; a.rel = "noopener"; } else a.hidden = true;
   });
   $$("[data-ig]").forEach((a) => { a.href = C.instagram || "#"; });
-  $$("[data-closer]").forEach((el) => { el.textContent = C.closer || "nosso especialista"; });
   $$("[data-ano]").forEach((el) => { el.textContent = new Date().getFullYear(); });
 
   const vagas = Math.max(0, Math.min(5, Number(C.vagasFundadores ?? 5)));
   $$("[data-vagas]").forEach((el) => { el.textContent = vagas; });
   $$(".dots").forEach((d) => {
-    d.innerHTML = Array.from({ length: 5 }, (_, i) => `<i class="${i < vagas ? "on" : ""}"></i>`).join("");
+    d.innerHTML = Array.from({ length: 5 }, (_, i) => `<i class="${i < vagas ? "on" : ""}" style="--i:${i}"></i>`).join("");
   });
+
+  /* Revelação ao rolar: cada bloco entra quando aparece na tela.
+     Em grupos com data-stagger, os filhos entram um depois do outro. */
+  $$("[data-stagger]").forEach((grupo) => {
+    [...grupo.children].forEach((filho, i) => {
+      filho.classList.add("reveal");
+      filho.style.setProperty("--d", `${i * 80}ms`);
+    });
+  });
+  const aoAparecer = new Map();
+  const alvos = $$(".reveal, .reveal-big, .steps, .vagas, .proj article, #calc");
+  const mostrar = (el) => {
+    el.classList.add("in");
+    const fn = aoAparecer.get(el);
+    if (fn) fn();
+  };
+  if ("IntersectionObserver" in window) {
+    const io = new IntersectionObserver((entradas) => {
+      for (const e of entradas) {
+        if (e.isIntersecting) { mostrar(e.target); io.unobserve(e.target); }
+      }
+    }, { rootMargin: "0px 0px -12% 0px", threshold: 0.15 });
+    alvos.forEach((el) => io.observe(el));
+  } else {
+    alvos.forEach(mostrar);
+  }
 
   /* Conversa de demonstração */
   const chat = $("#chat");
@@ -69,15 +95,15 @@
       new IntersectionObserver(([e]) => { visible = e.isIntersecting; }).observe(chat);
       const waitVisible = async () => { while (!visible) await sleep(400); };
       (async function loop() {
+        await sleep(900);
         for (;;) {
           chat.replaceChildren();
-          await sleep(700);
+          await sleep(500);
           for (const m of MSGS) {
             await waitVisible();
             if (m.from === "ia") {
               const typing = document.createElement("div");
               typing.className = "typing";
-              typing.setAttribute("aria-hidden", "true");
               typing.innerHTML = "<i></i><i></i><i></i>";
               chat.append(typing);
               await sleep(1200);
@@ -95,22 +121,38 @@
     }
   }
 
-  /* Calculadora de custo do trabalho manual */
+  /* Calculadora: o valor conta até o resultado em vez de trocar de uma vez */
   const calc = $("#calc");
   let custoMensal = 0;
   if (calc) {
     const p = $("#calc-pessoas"), h = $("#calc-horas"), c = $("#calc-custo");
+    const mes = $("#calc-mes"), ano = $("#calc-ano");
+    let mostrado = 0, raf = 0, ativo = false;
+    const pintar = (v) => { mes.textContent = brl(v); ano.textContent = brl(v * 12); };
+    const contar = (alvo) => {
+      cancelAnimationFrame(raf);
+      if (reduce) { mostrado = alvo; pintar(alvo); return; }
+      const de = mostrado, t0 = performance.now(), dur = 650;
+      const passo = (t) => {
+        const k = Math.min(1, (t - t0) / dur);
+        mostrado = de + (alvo - de) * (1 - Math.pow(1 - k, 3));
+        pintar(mostrado);
+        if (k < 1) raf = requestAnimationFrame(passo);
+      };
+      raf = requestAnimationFrame(passo);
+    };
     const update = () => {
       const pessoas = +p.value, horas = +h.value, custo = +c.value;
       $("#out-pessoas").textContent = pessoas === 1 ? "1 pessoa" : `${pessoas} pessoas`;
       $("#out-horas").textContent = `${horas} h`;
       $("#out-custo").textContent = brl(custo);
       custoMensal = pessoas * horas * 4.33 * custo;
-      $("#calc-mes").textContent = brl(custoMensal);
-      $("#calc-ano").textContent = brl(custoMensal * 12);
+      if (ativo) contar(custoMensal); else pintar(custoMensal);
     };
     [p, h, c].forEach((el) => el.addEventListener("input", update));
     update();
+    // Quando a calculadora aparece, o valor sobe do zero uma vez
+    aoAparecer.set(calc, () => { ativo = true; mostrado = 0; contar(custoMensal); });
   }
 
   /* Aplicação em etapas: no fim, leva para o WhatsApp com o resumo das respostas */
@@ -132,11 +174,12 @@
         { name: "setor", label: "Setor (ex.: clínica, loja, indústria, escritório)", type: "text" },
       ] },
     { title: "Quantas pessoas trabalham na empresa?", name: "colaboradores", options: ["1 a 5", "6 a 20", "21 a 50", "51 a 200", "Mais de 200"] },
-    { title: "Do que você mais precisa?", name: "necessidade", options: ["Agente de IA", "Automação de processos", "Sistema de gestão inteligente", "Site ou landing page", "Ainda não sei"] },
+    { title: "Do que você precisa?", hint: "Pode escolher mais de um.", name: "necessidade", multi: true, exclusivo: "Ainda não sei",
+      options: ["Agente de IA", "Automação de processos", "Sistema de gestão inteligente", "Site", "Landing page", "Outra solução com IA", "Ainda não sei"] },
     { title: "Qual tarefa mais toma tempo da sua equipe hoje?", hint: "Uma ou duas frases já bastam.",
       fields: [{ name: "dor", label: "Ex.: responder clientes no WhatsApp, montar relatório, lançar pedidos", type: "textarea" }] },
     { title: "Se fizer sentido, quando quer começar?", name: "quando", options: ["Este mês", "Nos próximos 3 meses", "Só estou pesquisando"] },
-    { title: "Quanto você pretende investir?", hint: "Isso nos ajuda a indicar o caminho certo para o seu projeto.", name: "investimento", options: ["Até R$ 3 mil", "R$ 3 a 10 mil", "R$ 10 a 25 mil", "Mais de R$ 25 mil"] },
+    { title: "Qual orçamento você tem em mente?", hint: "Isso nos ajuda a montar uma proposta que caiba no seu bolso.", name: "investimento", options: ["Até R$ 3 mil", "R$ 3 a 10 mil", "R$ 10 a 25 mil", "Mais de R$ 25 mil"] },
   ];
 
   let i = 0;
@@ -170,11 +213,11 @@
 
   function render() {
     const s = STEPS[i];
-    bar.style.width = `${(i / STEPS.length) * 100}%`;
+    bar.style.transform = `scaleX(${i / STEPS.length})`;
     count.textContent = `${i + 1} de ${STEPS.length}`;
     foot.hidden = false;
     back.hidden = i === 0;
-    next.hidden = !!s.options;
+    next.hidden = !!s.options && !s.multi;
     next.firstChild.textContent = i === STEPS.length - 1 ? "Ir para o WhatsApp " : "Continuar ";
 
     const wrap = document.createElement("div");
@@ -190,20 +233,47 @@
     if (s.options) {
       const list = document.createElement("div");
       list.className = "opts";
-      s.options.forEach((o) => {
+      list.setAttribute("role", "group");
+      list.setAttribute("aria-labelledby", "apl-title");
+      const marcado = (o) => (s.multi ? lista(a[s.name]).includes(o) : a[s.name] === o);
+      const contador = document.createElement("p");
+      contador.className = "sel-count";
+      contador.setAttribute("aria-live", "polite");
+      const atualizar = () => {
+        $$(".opt", list).forEach((x) => x.setAttribute("aria-pressed", marcado(x.textContent) ? "true" : "false"));
+        if (s.multi) {
+          const n = lista(a[s.name]).length;
+          contador.textContent = n === 0 ? "" : n === 1 ? "1 serviço escolhido" : `${n} serviços escolhidos`;
+        }
+      };
+      s.options.forEach((o, k) => {
         const b = document.createElement("button");
         b.type = "button";
-        b.className = "opt";
+        b.className = s.multi ? "opt multi" : "opt";
+        b.style.setProperty("--i", k);
         b.textContent = o;
-        b.setAttribute("aria-pressed", a[s.name] === o ? "true" : "false");
         b.addEventListener("click", () => {
-          a[s.name] = o; save();
-          $$(".opt", list).forEach((x) => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
-          setTimeout(goNext, reduce ? 0 : 180);
+          if (s.multi) {
+            let sel = lista(a[s.name]);
+            if (sel.includes(o)) sel = sel.filter((x) => x !== o);
+            else if (o === s.exclusivo) sel = [o];
+            else sel = sel.filter((x) => x !== s.exclusivo).concat(o);
+            a[s.name] = sel;
+            save();
+            atualizar();
+            $(".err", body).textContent = "";
+          } else {
+            a[s.name] = o;
+            save();
+            atualizar();
+            setTimeout(goNext, reduce ? 0 : 200);
+          }
         });
         list.append(b);
       });
       wrap.append(list);
+      if (s.multi) wrap.append(contador);
+      atualizar();
     } else {
       s.fields.forEach((f) => {
         const label = document.createElement("label");
@@ -238,7 +308,14 @@
   function validate() {
     const s = STEPS[i];
     const err = $(".err", body);
-    if (s.options) return !!a[s.name];
+    if (s.options) {
+      if (s.multi) {
+        if (lista(a[s.name]).length) return true;
+        err.textContent = "Escolha pelo menos um serviço.";
+        return false;
+      }
+      return !!a[s.name];
+    }
     for (const f of s.fields) {
       const v = (a[f.name] || "").trim();
       if (!v) { err.textContent = "Preencha este campo para continuar."; $(`#apl-${f.name}`).focus(); return false; }
@@ -260,7 +337,7 @@
   function finish() {
     a.trilha = trilha(a);
     send("completa");
-    bar.style.width = "100%";
+    bar.style.transform = "scaleX(1)";
     count.textContent = "Pronto";
     foot.hidden = true;
 
@@ -274,7 +351,7 @@
       `*Cargo:* ${a.cargo || "-"}`,
       `*Empresa:* ${a.empresa || "-"}${a.setor ? ` (${a.setor})` : ""}`,
       `*Equipe:* ${a.colaboradores || "-"} pessoas`,
-      `*Preciso de:* ${a.necessidade || "-"}`,
+      `*Preciso de:* ${lista(a.necessidade).join(", ") || "-"}`,
       `*O que mais toma tempo hoje:* ${a.dor || "-"}`,
       `*Quando quero começar:* ${a.quando || "-"}`,
       `*Orçamento escolhido:* ${a.investimento || "-"}`,
@@ -289,14 +366,14 @@
     h.textContent = `Pronto, ${nome}! Agora é só enviar.`;
     const p = document.createElement("p"); p.className = "muted";
     p.textContent = wa
-      ? "Vamos abrir o WhatsApp da Zunkuft com o resumo das suas respostas já escrito. Toque em enviar e você é atendido na hora."
+      ? "Vamos abrir o WhatsApp da Zunkuft com o resumo das suas respostas já escrito. Toque em enviar e o orçamento chega por lá."
       : `Recebemos suas respostas. Vamos te chamar no WhatsApp ${a.whatsapp || ""} em instantes.`;
     box.append(h, p);
     if (wa) {
       const el = document.createElement("a");
       el.className = "btn btn-primary"; el.href = wa; el.textContent = "Abrir o WhatsApp";
       box.append(el);
-      setTimeout(() => { location.href = wa; }, reduce ? 300 : 1200);
+      setTimeout(() => { location.href = wa; }, reduce ? 300 : 1400);
     }
     body.replaceChildren(box);
     store.del("zk_aplicacao");
@@ -321,7 +398,6 @@
     e.preventDefault();
     const extra = {};
     if (b.hasAttribute("data-from-calc") && custoMensal) extra.custo_estimado = Math.round(custoMensal);
-    if (b.dataset.pacote) extra.necessidade = "Site ou landing page";
     open(extra);
   }));
   if (location.hash === "#aplicar") open();
@@ -335,7 +411,10 @@
     if (pay || wa) {
       b.href = pay || wa; b.target = "_blank"; b.rel = "noopener";
     } else {
-      b.addEventListener("click", (e) => { e.preventDefault(); open({ necessidade: "Site ou landing page", investimento: "Até R$ 3 mil" }); });
+      b.addEventListener("click", (e) => {
+        e.preventDefault();
+        open({ necessidade: [key === "site" ? "Site" : "Landing page"], investimento: "Até R$ 3 mil" });
+      });
     }
   });
 })();

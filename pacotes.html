@@ -5,22 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Pacotes · Zunkuft Digital Intelligence</title>
 <meta name="description" content="Landing pages e sites com preço fechado, prontos para vender. Zunkuft Digital Intelligence.">
-<meta name="theme-color" content="#2B4BFF">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232B4BFF'/%3E%3Cpath d='M9 10h14L9 22h14' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#0131CD">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23B9FC01'/%3E%3Cpath d='M9 10h14L9 22h14' stroke='%230131CD' stroke-width='3.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,500..800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
 <link rel="stylesheet" href="assets/style.css">
+<script>document.documentElement.classList.add("js")</script>
 <script src="assets/config.js" defer></script>
 <script src="assets/app.js" defer></script>
 </head>
 <body>
 <a class="skip" href="#conteudo">Pular para o conteúdo</a>
+<div class="progress" aria-hidden="true"></div>
 
 <header class="top">
   <div class="container">
     <a class="brand" href="index.html" aria-label="Zunkuft Digital Intelligence, início">
-      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="currentColor"/><path d="M9 10h14L9 22h14" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#B9FC01"/><path d="M9 10h14L9 22h14" stroke="#0131CD" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <span><b>zunkuft</b><small>Digital Intelligence</small></span>
     </a>
     <nav class="nav" aria-label="Principal">
@@ -29,21 +31,24 @@
       <a href="index.html#teste">Teste de 7 dias</a>
       <a href="pacotes.html" aria-current="page">Pacotes</a>
     </nav>
-    <a class="btn btn-primary" href="#aplicar" data-aplicar>Pedir orçamento</a>
+    <a class="btn btn-lime" href="#aplicar" data-aplicar>Pedir orçamento</a>
   </div>
 </header>
 
 <main id="conteudo">
-<section>
+<section class="sec-blue" style="padding-block:clamp(56px,8vw,96px)">
   <div class="container">
-    <div class="sec-head">
-      <p class="eyebrow">Pacotes com preço fechado</p>
-      <h1 style="font-size:clamp(2.2rem,5vw,3.6rem)">Sua página no ar, pronta para vender</h1>
-      <p class="lead">Escolha o pacote, pague e a gente começa. Sem reunião, se você preferir. Todos vêm com design sob medida e botão direto para o seu WhatsApp.</p>
+    <div class="sec-head" style="margin-bottom:0">
+      <p class="eyebrow rise">Pacotes com preço fechado</p>
+      <h1 style="font-size:clamp(2.4rem,5.4vw,4rem)"><span class="w"><span style="--i:0">Sua</span></span> <span class="w"><span style="--i:1">página</span></span> <span class="w"><span style="--i:2">no</span></span> <span class="w"><span style="--i:3">ar,</span></span> <span class="mark"><span class="w"><span style="--i:4">pronta</span></span> <span class="w"><span style="--i:5">para</span></span> <span class="w"><span style="--i:6">vender</span></span></span></h1>
+      <p class="lead rise" style="--d:.6s">Escolha o pacote, pague e a gente começa. Sem reunião, se você preferir. Todos vêm com design sob medida e botão direto para o seu WhatsApp.</p>
     </div>
-
+  </div>
+</section>
+<section class="sec-paper">
+  <div class="container">
     <!-- Preços de exemplo: troque pelos valores reais da Zunkuft. -->
-    <div class="pk">
+    <div class="pk" data-stagger>
       <article>
         <span class="tag">Landing Page</span>
         <div class="price">R$ 1.490<small>pagamento único</small></div>
@@ -57,7 +62,7 @@
         <a class="btn btn-ghost" href="#" data-comprar="landing" data-nome="Landing Page">Quero este</a>
       </article>
       <article class="rec">
-        <span class="tag"><span>Site Profissional</span><span>Mais escolhido</span></span>
+        <span class="tag"><span>Site Profissional</span><span class="pill">Mais escolhido</span></span>
         <div class="price">R$ 2.490<small>pagamento único</small></div>
         <ul>
           <li>Até 5 páginas</li>
@@ -66,7 +71,7 @@
           <li>WhatsApp integrado em todas as páginas</li>
           <li>Entrega em até 14 dias</li>
         </ul>
-        <a class="btn btn-primary" href="#" data-comprar="site" data-nome="Site Profissional">Quero este</a>
+        <a class="btn btn-lime" href="#" data-comprar="site" data-nome="Site Profissional">Quero este</a>
       </article>
       <article>
         <span class="tag">Landing + Atendimento</span>
@@ -81,7 +86,7 @@
       </article>
     </div>
 
-    <div class="upsell">
+    <div class="upsell reveal">
       <div>
         <h3>Precisa de mais que uma página?</h3>
         <p class="muted">Agentes de IA, automações e sistemas de gestão são feitos sob medida. Responda 8 perguntas rápidas e receba o orçamento no WhatsApp, no mesmo dia.</p>
@@ -108,7 +113,7 @@
     <div class="apl-head">
       <div class="bar" aria-hidden="true"><i></i></div>
       <span class="count" aria-live="polite">1 de 8</span>
-      <button type="button" class="x" data-close aria-label="Fechar aplicação">×</button>
+      <button type="button" class="x" data-close aria-label="Fechar">×</button>
     </div>
     <div class="apl-body"></div>
     <div class="apl-foot">
